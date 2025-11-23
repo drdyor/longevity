@@ -5,19 +5,9 @@ from typing import List, Dict
 
 
 def search_pubmed(query: str, max_results: int = 5) -> List[Dict]:
-    """
-    Search PubMed for articles matching the query.
-    
-    Args:
-        query: Search query string
-        max_results: Maximum number of results to return
-    
-    Returns:
-        List of paper dictionaries with pmid, title, journal, pubdate
-    """
+    """Search PubMed for articles matching the query."""
     base_url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/"
     
-    # Search for article IDs
     search_params = {
         "db": "pubmed",
         "term": query,
@@ -35,18 +25,16 @@ def search_pubmed(query: str, max_results: int = 5) -> List[Dict]:
         search_data = search_response.json()
         
         ids = search_data.get("esearchresult", {}).get("idlist", [])
-        
         if not ids:
             return []
         
-        # Fetch article summaries
+        time.sleep(0.35)
+        
         summary_params = {
             "db": "pubmed",
             "id": ",".join(ids),
             "retmode": "json"
         }
-        
-        time.sleep(0.35)  # Rate limiting: ~3 requests per second
         
         summary_response = requests.get(
             base_url + "esummary.fcgi",
@@ -74,40 +62,17 @@ def search_pubmed(query: str, max_results: int = 5) -> List[Dict]:
 
 
 def format_references(papers: List[Dict]) -> str:
-    """
-    Format a list of papers into a readable text summary.
-    
-    Args:
-        papers: List of paper dictionaries
-    
-    Returns:
-        Formatted string of references
-    """
+    """Format a list of papers into a readable text summary."""
     if not papers:
         return "No results found."
-    
     lines = []
     for p in papers:
         lines.append(f"- {p['title']} ({p['journal']}, {p['pubdate']}) [PMID: {p['pmid']}]")
-    
     return "\n".join(lines)
 
 
 def build_search_query(claim: str, topic: str) -> str:
-    """
-    Build an optimized PubMed search query from a claim and topic.
-    
-    Args:
-        claim: The claim text
-        topic: The main topic
-    
-    Returns:
-        Formatted search query string
-    """
-    # Combine topic with longevity-related terms
+    """Build an optimized PubMed search query from a claim and topic."""
     base_terms = f"{topic} longevity lifespan healthspan aging"
-    
-    # Add study quality filters
     filters = "randomized trial OR clinical trial OR meta-analysis OR systematic review"
-    
     return f"({base_terms}) AND ({filters})"

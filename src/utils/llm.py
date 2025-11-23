@@ -5,16 +5,7 @@ import ollama
 
 
 def chat_completion(prompt: str, model: str = "llama3:8b") -> str:
-    """
-    Send a prompt to the local Ollama model and return the response.
-    
-    Args:
-        prompt: The prompt text to send
-        model: Ollama model name (default: "llama3:8b")
-    
-    Returns:
-        The model's text response
-    """
+    """Send a prompt to the local Ollama model and return the response."""
     try:
         resp = ollama.chat(
             model=model,
@@ -27,57 +18,30 @@ def chat_completion(prompt: str, model: str = "llama3:8b") -> str:
 
 
 def extract_json_from_response(response: str) -> Any:
-    """
-    Try to extract and parse JSON from an LLM response.
-    
-    Args:
-        response: Raw LLM response text
-    
-    Returns:
-        Parsed JSON object or empty dict/list on failure
-    """
+    """Try to extract and parse JSON from an LLM response."""
     try:
-        # First try direct parsing
         return json.loads(response)
     except json.JSONDecodeError:
-        # Try to find JSON in the response
         start = response.find("[")
         end = response.rfind("]")
-        
         if start != -1 and end != -1:
             try:
                 return json.loads(response[start:end+1])
             except json.JSONDecodeError:
                 pass
-        
-        # Try to find JSON object
         start = response.find("{")
         end = response.rfind("}")
-        
         if start != -1 and end != -1:
             try:
                 return json.loads(response[start:end+1])
             except json.JSONDecodeError:
                 pass
-        
-        # Fallback
         return {}
 
 
 def extract_claims_from_post(title: str, selftext: str, model: str = "llama3:8b") -> List[Dict]:
-    """
-    Extract longevity-related claims from a Reddit post.
-    
-    Args:
-        title: Post title
-        selftext: Post body text
-        model: Ollama model to use
-    
-    Returns:
-        List of claim dictionaries
-    """
+    """Extract longevity-related claims from a Reddit post."""
     text = f"{title}\n\n{selftext}".strip()
-    
     if not text:
         return []
     
@@ -104,26 +68,13 @@ TEXT:
     
     response = chat_completion(prompt, model)
     claims = extract_json_from_response(response)
-    
     if not isinstance(claims, list):
         return []
-    
     return claims
 
 
 def evaluate_claim(claim: str, topic: str, references_text: str, model: str = "llama3:8b") -> Dict:
-    """
-    Evaluate a claim against scientific references.
-    
-    Args:
-        claim: The claim to evaluate
-        topic: The main topic of the claim
-        references_text: Text summary of scientific references
-        model: Ollama model to use
-    
-    Returns:
-        Dictionary with evidence_level, explanation, and references
-    """
+    """Evaluate a claim against scientific references."""
     prompt = f"""You are a critical longevity researcher.
 
 CLAIM:
@@ -152,11 +103,6 @@ Return JSON ONLY (no other text):
     
     response = chat_completion(prompt, model)
     result = extract_json_from_response(response)
-    
     if not isinstance(result, dict):
-        return {
-            "evidence_level": "unknown",
-            "explanation": "Could not parse evaluation"
-        }
-    
+        return {"evidence_level": "unknown", "explanation": "Could not parse evaluation"}
     return result
