@@ -1,8 +1,5 @@
 """
 Interactive Streamlit Dashboard for r/longevity Evidence Analysis
-
-This app provides an interactive interface to explore claims extracted from
-r/longevity and their evidence ratings.
 """
 import os
 import sys
@@ -10,29 +7,24 @@ import glob
 import pandas as pd
 import streamlit as st
 
-# Add parent directory to path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
 
 @st.cache_data
 def load_latest_evidence():
     """Load the most recent evidence file."""
     processed_dir = "data/processed"
     
-    # Try parquet first
     parquet_files = glob.glob(os.path.join(processed_dir, "claims_evidence_*.parquet"))
     if parquet_files:
         latest_file = max(parquet_files)
         return pd.read_parquet(latest_file)
     
-    # Fall back to CSV
     csv_files = glob.glob(os.path.join(processed_dir, "claims_evidence_*.csv"))
     if csv_files:
         latest_file = max(csv_files)
         return pd.read_csv(latest_file)
     
     return None
-
 
 def main():
     """Main Streamlit app."""
@@ -45,44 +37,25 @@ def main():
     st.title("🧬 r/longevity Evidence Tracker")
     st.markdown("*Analyzing longevity claims from Reddit against scientific evidence*")
     
-    # Load data
     df = load_latest_evidence()
     
     if df is None:
         st.error("No evidence data found. Please run the pipeline first:")
         st.code("""
-python src/01_collect.py
+python src/generate_demo_data.py
 python src/02_extract_claims.py
 python src/03_evidence_check.py
         """)
         return
     
-    # Sidebar filters
     st.sidebar.header("Filters")
     
-    # Topic filter
     topics = ["All"] + sorted(df["topic"].unique().tolist())
     selected_topic = st.sidebar.selectbox("Topic", topics)
     
-    # Evidence level filter
     evidence_levels = ["All"] + sorted(df["evidence_level"].unique().tolist())
     selected_evidence = st.sidebar.selectbox("Evidence Level", evidence_levels)
     
-    # Direction filter
-    if "direction" in df.columns:
-        directions = ["All"] + sorted(df["direction"].unique().tolist())
-        selected_direction = st.sidebar.selectbox("Direction", directions)
-    else:
-        selected_direction = "All"
-    
-    # Type filter
-    if "type" in df.columns:
-        types = ["All"] + sorted(df["type"].unique().tolist())
-        selected_type = st.sidebar.selectbox("Type", types)
-    else:
-        selected_type = "All"
-    
-    # Apply filters
     filtered_df = df.copy()
     
     if selected_topic != "All":
@@ -91,17 +64,9 @@ python src/03_evidence_check.py
     if selected_evidence != "All":
         filtered_df = filtered_df[filtered_df["evidence_level"] == selected_evidence]
     
-    if selected_direction != "All" and "direction" in filtered_df.columns:
-        filtered_df = filtered_df[filtered_df["direction"] == selected_direction]
-    
-    if selected_type != "All" and "type" in filtered_df.columns:
-        filtered_df = filtered_df[filtered_df["type"] == selected_type]
-    
-    # Sort by score
     if "post_score" in filtered_df.columns:
         filtered_df = filtered_df.sort_values("post_score", ascending=False)
     
-    # Summary metrics
     col1, col2, col3, col4 = st.columns(4)
     
     with col1:
@@ -119,13 +84,11 @@ python src/03_evidence_check.py
         if "post_score" in filtered_df.columns:
             st.metric("Total Reddit Score", f"{filtered_df['post_score'].sum():,}")
     
-    # Tabs for different views
     tab1, tab2, tab3 = st.tabs(["📋 Claims List", "📊 Analytics", "📥 Export"])
     
     with tab1:
         st.subheader("Claims")
         
-        # Search box
         search = st.text_input("🔍 Search claims", "")
         if search:
             filtered_df = filtered_df[
@@ -133,7 +96,6 @@ python src/03_evidence_check.py
                 filtered_df["explanation"].str.contains(search, case=False, na=False)
             ]
         
-        # Display claims
         for idx, row in filtered_df.head(50).iterrows():
             with st.expander(f"**{row['claim'][:100]}...**" if len(row['claim']) > 100 else f"**{row['claim']}**"):
                 col_a, col_b = st.columns([2, 1])
@@ -141,9 +103,7 @@ python src/03_evidence_check.py
                 with col_a:
                     st.markdown(f"**Topic:** {row.get('topic', 'N/A')}")
                     st.markdown(f"**Type:** {row.get('type', 'N/A')}")
-                    st.markdown(f"**Direction:** {row.get('direction', 'N/A')}")
                     
-                    # Evidence
                     evidence_emoji = {
                         "strong_support": "✅",
                         "moderate_support": "🟡",
@@ -165,10 +125,11 @@ python src/03_evidence_check.py
                     st.markdown(f"**Papers Found:** 📄 {row.get('num_papers_found', 0)}")
                     
                     if row.get("pmid_list"):
-                        pmids = row["pmid_list"].split(",")
+                        pmids = str(row["pmid_list"]).split(",")
                         st.markdown("**PubMed IDs:**")
                         for pmid in pmids[:3]:
-                            st.markdown(f"[{pmid}](https://pubmed.ncbi.nlm.nih.gov/{pmid}/)")
+                            if pmid.strip():
+                                st.markdown(f"[{pmid}](https://pubmed.ncbi.nlm.nih.gov/{pmid}/)")
         
         if len(filtered_df) > 50:
             st.info(f"Showing 50 of {len(filtered_df)} claims. Adjust filters to narrow results.")
@@ -189,7 +150,6 @@ python src/03_evidence_check.py
                 topic_counts = filtered_df["topic"].value_counts().head(10)
                 st.bar_chart(topic_counts)
         
-        # Hype vs Evidence Analysis
         st.markdown("### 🔥 Hype vs Evidence Gap")
         st.markdown("*Claims with high Reddit scores but weak evidence*")
         
@@ -210,7 +170,6 @@ python src/03_evidence_check.py
     with tab3:
         st.subheader("Export Data")
         
-        # CSV download
         csv = filtered_df.to_csv(index=False)
         st.download_button(
             label="📥 Download as CSV",
@@ -219,7 +178,6 @@ python src/03_evidence_check.py
             mime="text/csv"
         )
         
-        # Markdown report
         st.markdown("### Generate Markdown Report")
         if st.button("Generate Report"):
             markdown = f"""# r/longevity Evidence Report
@@ -249,7 +207,6 @@ Generated: {pd.Timestamp.now().strftime("%Y-%m-%d %H:%M")}
                 file_name="longevity_report.md",
                 mime="text/markdown"
             )
-
 
 if __name__ == "__main__":
     main()
