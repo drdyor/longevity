@@ -1,41 +1,44 @@
-# .github/workflows/daily_refresh.yml
 name: Daily refresh r/longevity evidence
 
 on:
   schedule:
-    - cron: '05 08 * * *'   # 08:05 UTC every morning
-  workflow_dispatch:        # manual “Run” button in GitHub UI
-  push:
-    branches: [ main ]      # also runs after any push (so you see it work now)
+    - cron: '0 0 * * *'  # Daily at midnight UTC
+  workflow_dispatch:  # Allow manual trigger
 
 jobs:
   update:
     runs-on: ubuntu-latest
+    
     steps:
-      - name: Check out repo
+      - name: Checkout repository
         uses: actions/checkout@v4
-
+      
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-
+      
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-
-      - name: Reddit → claims → evidence
-        env:
-          REDDIT_CLIENT: ${{ secrets.REDDIT_CLIENT }}
-          REDDIT_SECRET: ${{ secrets.REDDIT_SECRET }}
+      
+      - name: Install Ollama
         run: |
-          python src/01_collect.py
-          python src/02_extract_claims.py
-          python src/03_evidence_check.py
-
-      - name: Commit & push new data
-        uses: stefanzweifel/git-auto-commit-action@v5
+          curl -fsSL https://ollama.com/install.sh | sh
+          ollama pull llama3.2:3b
+      
+      - name: Generate demo data
+        run: python src/generate_demo_data.py
+      
+      - name: Extract claims
+        run: python src/02_extract_claims.py
+      
+      - name: Check evidence
+        run: python src/03_evidence_check.py
+      
+      - name: Upload results
+        uses: actions/upload-artifact@v4
         with:
-          commit_message: 'chore: daily data refresh'
-          file_pattern: 'data/processed/*.csv data/processed/*.parquet'
+          name: evidence-results
+          path: data/processed/*.csv
