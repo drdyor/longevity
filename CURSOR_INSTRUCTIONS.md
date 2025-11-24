@@ -54,16 +54,16 @@ In Cursor's terminal:
 ```bash
 # Mac/Linux
 curl -fsSL https://ollama.com/install.sh | sh
-ollama pull llama3:8b
+ollama pull llama3.2:3b
 
 # Windows: Download from https://ollama.com/download
-# Then run: ollama pull llama3:8b
+# Then run: ollama pull llama3.2:3b
 ```
 
 **Option B - Ask Cursor:**
 
 Just ask Cursor in chat:
-> "Install Ollama and pull the llama3:8b model"
+> "Install Ollama and pull the llama3.2:3b model"
 
 Cursor will handle it automatically.
 
@@ -251,7 +251,7 @@ Ask Cursor:
 > "I'm running out of memory, what can I do?"
 
 Cursor will suggest:
-- Use smaller model: `ollama pull llama3:8b-q4_0`
+- Use smaller model: `ollama pull llama3.2:1b`
 - Process fewer posts at once
 - Use cloud option instead
 

@@ -23,8 +23,8 @@ setup:
 	else \
 		echo "Ollama already installed"; \
 	fi
-	@echo "Pulling llama3:8b model..."
-	ollama pull llama3:8b
+	@echo "Pulling llama3.2:3b model..."
+	ollama pull llama3.2:3b
 
 collect:
 	python src/01_collect.py

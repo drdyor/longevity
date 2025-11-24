@@ -61,17 +61,17 @@ Save and exit.
 **Mac/Linux:**
 ```bash
 curl -fsSL https://ollama.com/install.sh | sh
-ollama pull llama3:8b
+ollama pull llama3.2:3b
 ```
 
 **Windows:**
 1. Download from: https://ollama.com/download
 2. Install and run
-3. Open PowerShell and run: `ollama pull llama3:8b`
+3. Open PowerShell and run: `ollama pull llama3.2:3b`
 
 **Test it:**
 ```bash
-ollama run llama3:8b "Hello"
+ollama run llama3.2:3b "Hello"
 ```
 
 If you see a response, you're good!
@@ -125,7 +125,7 @@ If your laptop is struggling:
 %cd longevity-reddit-agent
 !pip install -q -r requirements.txt
 !curl -fsSL https://ollama.com/install.sh | sh
-!ollama pull llama3:8b
+!ollama pull llama3.2:3b
 
 # Set credentials (replace with yours)
 import os
@@ -179,8 +179,8 @@ ollama serve  # In one terminal
 
 ### Out of memory
 ```bash
-# Use smaller model
-ollama pull llama3:8b-q4_0
+# Use even smaller model if needed
+ollama pull llama3.2:1b
 
 # Or edit the scripts to process fewer posts:
 # In src/01_collect.py, change MAX_POSTS to 1000

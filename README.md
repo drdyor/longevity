@@ -48,7 +48,7 @@ cp .env.example .env
 
 ```bash
 make setup
-# This installs Ollama and downloads the llama3:8b model (~5GB)
+# This installs Ollama and downloads the llama3.2:3b model (~2GB)
 ```
 
 **Alternative:** If your laptop is slow, see [Cloud Options](#-cloud-deployment-free) below.
@@ -177,7 +177,7 @@ REDDIT_PASSWORD=your_password
 DATA_DIR=data
 
 # LLM Model (optional)
-OLLAMA_MODEL=llama3:8b
+OLLAMA_MODEL=llama3.2:3b
 ```
 
 ## 📈 Performance
@@ -217,7 +217,7 @@ OLLAMA_MODEL=llama3:8b
 ollama serve
 
 # Test it
-ollama run llama3:8b "Hello"
+ollama run llama3.2:3b "Hello"
 ```
 
 ### Reddit API errors
@@ -226,13 +226,13 @@ ollama run llama3:8b "Hello"
 - Ensure rate limits (60 req/min)
 
 ### Out of memory
-- Use smaller model: `ollama pull llama3:8b-q4_0`
+- Use smaller model: `ollama pull llama3.2:1b`
 - Process in batches (edit MAX_POSTS in scripts)
 - Use cloud option instead
 
 ### No claims extracted
 - Verify Ollama is running: `ollama list`
-- Check model is downloaded: `ollama pull llama3:8b`
+- Check model is downloaded: `ollama pull llama3.2:3b`
 - Try with verbose logging: `python -v src/02_extract_claims.py`
 
 ## 🔄 Keeping Data Fresh

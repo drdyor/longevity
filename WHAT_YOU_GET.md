@@ -46,7 +46,7 @@ Loading posts from: data/raw/posts_2024-11-23.csv
 ✓ Loaded 6214 posts
 
 Extracting claims (this may take a while)...
-Note: Make sure Ollama is running with llama3:8b model
+Note: Make sure Ollama is running with llama3.2:3b model
   Progress: 0/6214 posts processed (0 claims found)
   Progress: 10/6214 posts processed (18 claims found)
   Progress: 20/6214 posts processed (41 claims found)
