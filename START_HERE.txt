@@ -1,0 +1,39 @@
+🚀 REDDIT LONGEVITY EVIDENCE AGENT - START HERE
+
+You now have a complete system to analyze longevity claims from r/longevity!
+
+WHAT TO READ FIRST:
+
+1. PROJECT_SUMMARY.md   <- Overview of what you have
+2. QUICKSTART.md        <- 15-minute setup guide
+3. WHAT_YOU_GET.md      <- See the actual output
+4. README.md            <- Full documentation
+
+QUICK START (3 commands):
+
+  cp .env.example .env
+  # Edit .env with Reddit credentials (see QUICKSTART.md)
+  
+  make install && make setup
+  make all
+  make dashboard
+
+WHAT YOU'LL GET:
+
+✅ ~6,000 Reddit posts from r/longevity
+✅ ~12,000 extracted longevity claims  
+✅ Evidence ratings from PubMed
+✅ Interactive web dashboard
+✅ CSV/Markdown exports for your book
+
+COST: $0 forever
+
+TIME: 
+- Setup: 15 minutes (one-time)
+- First run: 90 minutes (automated)
+
+NEED HELP?
+- Read QUICKSTART.md for troubleshooting
+- Check README.md for detailed docs
+
+Ready? Open QUICKSTART.md and follow along!
