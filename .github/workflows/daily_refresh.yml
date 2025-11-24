@@ -23,18 +23,20 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
       
-      - name: Install Ollama
+      - name: Install and start Ollama
         run: |
           curl -fsSL https://ollama.com/install.sh | sh
+          ollama serve &
+          sleep 5
           ollama pull llama3.2:3b
       
-      - name: Generate demo data
+      - name: Generate demo data (no Reddit API needed)
         run: python src/generate_demo_data.py
       
-      - name: Extract claims
+      - name: Extract claims from demo data
         run: python src/02_extract_claims.py
       
-      - name: Check evidence
+      - name: Check evidence against PubMed
         run: python src/03_evidence_check.py
       
       - name: Upload results
