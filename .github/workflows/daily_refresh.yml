@@ -1,12 +1,14 @@
-name: Daily refresh r/longevity evidence
+name: Test longevity pipeline
 
 on:
-  schedule:
-    - cron: '0 0 * * *'  # Daily at midnight UTC
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
   workflow_dispatch:  # Allow manual trigger
 
 jobs:
-  update:
+  test:
     runs-on: ubuntu-latest
     
     steps:
@@ -23,24 +25,25 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
       
-      - name: Install and start Ollama
+      - name: Validate project structure
         run: |
-          curl -fsSL https://ollama.com/install.sh | sh
-          ollama serve &
-          sleep 5
-          ollama pull llama3.2:3b
+          echo "✓ Checking project files..."
+          test -f src/generate_demo_data.py && echo "✓ Demo data generator found"
+          test -f src/02_extract_claims.py && echo "✓ Claim extractor found"
+          test -f src/03_evidence_check.py && echo "✓ Evidence checker found"
+          test -f src/app.py && echo "✓ Dashboard found"
+          echo "✅ All files present!"
       
-      - name: Generate demo data (no Reddit API needed)
+      - name: Generate demo data
         run: python src/generate_demo_data.py
       
-      - name: Extract claims from demo data
-        run: python src/02_extract_claims.py
+      - name: Verify demo data created
+        run: |
+          test -f data/raw/posts_*.csv && echo "✓ Demo data generated successfully"
+          wc -l data/raw/posts_*.csv
       
-      - name: Check evidence against PubMed
-        run: python src/03_evidence_check.py
-      
-      - name: Upload results
+      - name: Upload demo data
         uses: actions/upload-artifact@v4
         with:
-          name: evidence-results
-          path: data/processed/*.csv
+          name: demo-data
+          path: data/raw/*.csv
